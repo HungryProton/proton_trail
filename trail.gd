@@ -22,7 +22,7 @@ class Point:
 
 func _ready():
 	set_process(true)
-	add_child(geometry)
+	get_tree().get_root().call_deferred("add_child", geometry)
 	
 	geometry.set_name("TrailMeshInstance")
 	geometry.set_material_override(material)
@@ -57,8 +57,6 @@ func _update_geometry_data(delta):
 
 	if data[0].midpoint.distance_squared_to(data[1].midpoint) >= resolution_squared:
 		_add_point_to_trail()
-	
-
 
 func _add_point_to_trail():
 	var p = Point.new()
@@ -69,16 +67,14 @@ func _add_point_to_trail():
 	data.push_front(p)
 
 func _draw_geometry():
-	if(len(data) <= 1):
+	if(len(data) < 1):
 		return
 	geometry.clear()
 	geometry.begin(Mesh.PRIMITIVE_TRIANGLE_STRIP, null)
-	
-	var origin = get_parent().get_global_transform().origin
-	
+
 	for i in range(len(data)):
-		geometry.add_vertex(to_local(data[i].p1))
-		geometry.add_vertex(to_local(data[i].p2))
+		geometry.add_vertex(data[i].p1)
+		geometry.add_vertex(data[i].p2)
 
 	geometry.end()
 
