@@ -1,6 +1,6 @@
 # 3D Trail addon for Godot
 
-![trail](https://user-images.githubusercontent.com/52043844/59968224-af19ff80-9536-11e9-81b2-8d815403904b.png)
+![trail](https://thumbs.gfycat.com/MassiveLightheartedCrossbill-small.gif)
 
 ## Disclaimer
 
