@@ -19,5 +19,5 @@ Add 3D trail custom node for Godot Engine
 + Go to **Project settings > Plugins** and activate the **Trail** plugin
 + Add a **Trail** node to your scene
   - Add two Spatial nodes named **Top** and **Bottom** to your trail
-  - These two points defined the width of the trail
+  - These two points defines the width of the trail
   - The LifeTime parameter defines how long the trail is
