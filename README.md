@@ -1,6 +1,6 @@
 # 3D Trail addon for Godot
 
-![trail](https://thumbs.gfycat.com/MassiveLightheartedCrossbill-small.gif)
+![trail](https://thumbs.gfycat.com/DependentRaggedAmericancrocodile-small.gif)
 
 ## Disclaimer
 
@@ -18,6 +18,11 @@ Add 3D trail custom node for Godot Engine
 ## How to use
 + Go to **Project settings > Plugins** and activate the **Trail** plugin
 + Add a **Trail** node to your scene
-  - Add two Spatial nodes named **Top** and **Bottom** to your trail
-  - These two points defines the width of the trail
-  - The LifeTime parameter defines how long the trail is
++ Add two Spatial nodes named **Top** and **Bottom** to your trail
+
+You should have a setup similar to this :
+
+![trail_setup_1](https://user-images.githubusercontent.com/52043844/59978520-56517200-95dd-11e9-9b4f-ab4428f811df.PNG)
+
++ The **Top** and **Bottom** nodes defines the width of the trail. When these nodes move through space, the trail is generated between them
++ The LifeTime parameter defines how long the trail is. Higher value means a longer trail
