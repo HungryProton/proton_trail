@@ -1,0 +1,75 @@
+[gd_scene load_steps=6 format=2]
+
+[ext_resource path="res://addons/gm_trail/trail.gd" type="Script" id=1]
+[ext_resource path="res://addons/gm_trail/trail.svg" type="Texture" id=2]
+[ext_resource path="res://addons/gm_trail/demo/sword_trail.tres" type="Material" id=3]
+
+[sub_resource type="Animation" id=2]
+resource_name = "Swing"
+loop = true
+tracks/0/type = "bezier"
+tracks/0/path = NodePath(".:rotation_degrees:x")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"points": PoolRealArray( 0, -0.25, 0, 0.25, 0, 0.0363652, -0.25, 0, 0.25, 0, 0, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0, 0.5, 1 )
+}
+tracks/1/type = "bezier"
+tracks/1/path = NodePath(".:rotation_degrees:y")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"points": PoolRealArray( 0, -0.25, 0, 0.25, 0, -0.209763, -0.25, 0, 0.25, 0, 0, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0, 0.5, 1 )
+}
+tracks/2/type = "bezier"
+tracks/2/path = NodePath(".:rotation_degrees:z")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"points": PoolRealArray( 107.664, -0.25, 0, 0.25, 0, -108.895, -0.25, 0, 0.25, 0, 107.664, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0, 0.5, 1 )
+}
+
+[sub_resource type="CubeMesh" id=1]
+size = Vector3( 0.1, 1, 0.1 )
+
+[node name="DemoTrail" type="Spatial"]
+
+[node name="Camera" type="Camera" parent="."]
+transform = Transform( 1, 0, 0, 0, 0.931617, 0.363443, 0, -0.363443, 0.931617, 0, 1.82373, 2.84205 )
+
+[node name="RotationRoot" type="Spatial" parent="."]
+transform = Transform( -0.144853, -0.989453, -0.000157818, 0.989453, -0.144853, -2.73598e-005, 4.21099e-006, -0.000160116, 1, 0, 0, 0 )
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="RotationRoot"]
+autoplay = "Swing"
+anims/Swing = SubResource( 2 )
+
+[node name="MeshInstance" type="MeshInstance" parent="RotationRoot"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0 )
+mesh = SubResource( 1 )
+material/0 = null
+
+[node name="Trail" type="Spatial" parent="RotationRoot"]
+transform = Transform( 1, -6.74248e-010, 0, -6.74248e-010, 1, 0, 0, 0, 1, 7.84465e-011, -0.116347, -3.63798e-012 )
+script = ExtResource( 1 )
+__meta__ = {
+"_editor_icon": ExtResource( 2 )
+}
+material = ExtResource( 3 )
+resolution = 0.1
+life_time = 0.2
+
+[node name="Top" type="Spatial" parent="RotationRoot/Trail"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.1, 0 )
+
+[node name="Bottom" type="Spatial" parent="RotationRoot/Trail"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 0 )

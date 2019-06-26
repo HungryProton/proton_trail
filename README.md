@@ -2,9 +2,9 @@
 
 ![trail](https://thumbs.gfycat.com/DependentRaggedAmericancrocodile-small.gif)
 
-## Disclaimer
+## Notes
 
-+ This addon is still a work in progress and far from a usable state
++ This addon is still a work in progress and not production ready, some things will change a lot
 + Initialy developped for my game (codenamed GlassMainframe, hence the "gm" prefix)
 + Feel free to fork it and reuse what you can.
 
@@ -26,3 +26,8 @@ You should have a setup similar to this :
 
 + The **Top** and **Bottom** nodes defines the width of the trail. When these nodes move through space, the trail is generated between them
 + The LifeTime parameter defines how long the trail is. Higher value means a longer trail
+
+## Roadmap
++ Replace the **Top** / **Bottom** nodes by single 3D path node to be cleaner and more flexible
++ Add more parameters to change the trail shape over time
++ Fix issues
