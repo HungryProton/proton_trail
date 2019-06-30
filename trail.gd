@@ -1,4 +1,4 @@
-extends Spatial
+extends Path
 
 # --
 # GM Trail
@@ -32,88 +32,127 @@ extends Spatial
 class_name GM_Trail
 
 export(Material) var material
-export(float) var resolution = 0.2
+export(float) var cross_section_resolution = 0.5
+export(float) var trail_resolution = 1
 export(float) var life_time = 0.1
 export(bool) var emit = true
+export(bool) var flip_uv_x = false
+export(bool) var flip_uv_y = false
+export(NodePath) var debug_path
 
-# TODO : replace with an arbitrary sized array of positions
-onready var trail_top : Spatial = get_node("Top")
-onready var trail_bottom : Spatial = get_node("Bottom")
-
-var geometry : ImmediateGeometry = ImmediateGeometry.new()
-var data : Array = []
-var midpoint : Vector3
-var resolution_squared : float
+export(NodePath) var debug
+onready var dnode = get_node(debug)
+onready var dpath = get_node(debug_path)
 
 class Point:
 	var ttl : float
-	var midpoint : Vector3
-	var p1 : Vector3
-	var p2 : Vector3
+	var basis : Basis
+
+var geometry : ImmediateGeometry = ImmediateGeometry.new()
+var points : Array = []
+var trail_curve : Curve3D
 
 func _ready():
 	set_process(true)
+	_init_geometry()
+	_init_trail_curve()
+	_init_cross_section_path()
+
+func _init_geometry():
+	# Generated geometry is attached to the scene root node to simplify
+	# the mesh generation and reduce unnecessary local <-> global space
+	# switches
 	get_tree().get_root().call_deferred("add_child", geometry)
-	
 	geometry.set_name("TrailMeshInstance")
 	geometry.set_material_override(material)
 	geometry.translation = Vector3(0.0, 0.0, 0.0)
-	
-	resolution_squared = resolution * resolution
+
+func _init_trail_curve():
+	trail_curve = Curve3D.new()
+	trail_curve.set_bake_interval(0.1)
+	trail_curve.clear_points()
+
+func _init_cross_section_path():
+	# If the path is empty, add two points to create a minimal valid trail
+	# and give the user a visual clue in the editor
+	if curve.get_point_count() == 0:
+		curve.add_point(Vector3(0.0, 0.0, 0.0))
+		curve.add_point(Vector3(0.0, 1.0, 0.0))
+		curve.set_bake_interval(0.1)
 
 func _process(delta):
-	_update_midpoint()
-	_update_last_points()
-	_update_geometry_data(delta)
+	_update_trail_path(delta)
 	_draw_geometry()
 
-func _update_last_points():
-	if len(data) == 0:
-		return
-
-	data[0].p1 = trail_top.get_global_transform().origin
-	data[0].p2 = trail_bottom.get_global_transform().origin
-	data[0].midpoint = midpoint
-
-func _update_geometry_data(delta):
-	for i in range(len(data) - 1, 0, -1):
-		data[i].ttl -= delta
-		if data[i].ttl <= 0:
-			data.pop_back()
+func _update_trail_path(delta):
+	# Remove old points from the trail path
+	for i in range(trail_curve.get_point_count() - 1, -1, -1):
+		points[i].ttl -= delta
+		if points[i].ttl <= 0:
+			points.remove(i)
+			trail_curve.remove_point(i)
+			
 	if not emit:
 		return
-	if len(data) <= 1:
-		_add_point_to_trail()
-		return
-	if data[0].midpoint.distance_squared_to(data[1].midpoint) >= resolution_squared:
-		_add_point_to_trail()
-
-func _add_point_to_trail():
+	# Add a new point in the path at the current trail global position
 	var p = Point.new()
 	p.ttl = life_time
-	p.p1 = trail_top.get_global_transform().origin
-	p.p2 = trail_bottom.get_global_transform().origin
-	p.midpoint = midpoint
-	data.push_front(p)
+	p.basis = get_global_transform().basis
+	points.push_back(p)
+	trail_curve.add_point(to_global(curve.get_point_position(0)))
 
 func _draw_geometry():
-	if(len(data) < 1):
+	
+	if(trail_curve.get_point_count() < 1):
 		return
 	geometry.clear()
-	geometry.begin(Mesh.PRIMITIVE_TRIANGLE_STRIP, null)
-	var count = len(data)
-	for i in range(count):
-		var uv_x = i/(count+0.0)
+	
+	var trail_count = round(trail_curve.get_baked_length() / trail_resolution) + 1
+	var cross_count = round(curve.get_baked_length() / cross_section_resolution) + 1 
+	
+	var trail_pixel_length = trail_curve.get_baked_length()
+	var cross_pixel_length = curve.get_baked_length()
+	var c_origin = curve.get_point_position(0)
+	
+	#dnode.translation = c_origin + trail_curve.interpolate_baked(0.0)
+	#dnode.look_at(points[0].normal, dnode.get_global_transform().basis.z)
 		
-		geometry.set_uv(Vector2(uv_x, 1.0))
-		geometry.add_vertex(data[i].p1)
+	for i in range(trail_count):
+		geometry.begin(Mesh.PRIMITIVE_TRIANGLE_STRIP, null)
 		
-		geometry.set_uv(Vector2(uv_x , 0.0))
-		geometry.add_vertex(data[i].p2)
+		var pos = Vector3.ZERO
+		var pos_offset = Vector3.ZERO
+		var uv = Vector2.ZERO
+		var uv_x_l = i / float(trail_count)
+		var uv_x_r = (i + 1) / float(trail_count)
+		
+		var trail_pos_i = trail_curve.interpolate_baked((i/float(trail_count)) * trail_pixel_length)
+		var trail_pos_i_1 = trail_curve.interpolate_baked(((i + 1)/float(trail_count)) * trail_pixel_length)
+	
+		var basis = points[i].basis
 
-	geometry.end()
+		for j in range(cross_count) :
+			uv.x = 1 - uv_x_l
+			uv.y = j / float(cross_count)
+			
+			var v1 =  curve.interpolate_baked((j / float(cross_count)) * cross_pixel_length) - c_origin
+			pos = v1 + trail_pos_i
+			_add_vertex(pos, uv)
+		
+			uv.x = 1 - uv_x_r
+			v1 = curve.interpolate_baked((j / float(cross_count)) * cross_pixel_length) - c_origin
+			pos = v1 + trail_pos_i_1
+			_add_vertex(pos, uv)
 
-func _update_midpoint():
-	if not trail_top:
-		_ready()
-	midpoint = (trail_top.get_global_transform().origin + trail_bottom.get_global_transform().origin) / 2.0
+		# Complete the current strip
+		geometry.end()
+
+func _add_vertex(pos, uv):
+	# Handle uv options
+	if flip_uv_x:
+		uv.x = 1 - uv.x
+	if flip_uv_y:
+		uv.y = 1 - uv.y
+
+	geometry.set_uv(uv)
+	geometry.add_vertex(pos)

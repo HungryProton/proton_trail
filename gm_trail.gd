@@ -7,7 +7,7 @@ func get_name():
 func _enter_tree():
 	add_custom_type(
 		"Trail", 
-		"Spatial",
+		"Path",
 		load("res://addons/gm_trail/trail.gd"),
 		load("res://addons/gm_trail/trail.svg")
 	)
