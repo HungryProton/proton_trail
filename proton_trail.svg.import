@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/trail.svg-89e627701d7895e03e21e97df7bc46bd.stex"
+path="res://.import/proton_trail.svg-d12603cf005191ac7bc2fb365184e358.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/gm_trail/trail.svg"
-dest_files=[ "res://.import/trail.svg-89e627701d7895e03e21e97df7bc46bd.stex" ]
+source_file="res://addons/proton_trail/proton_trail.svg"
+dest_files=[ "res://.import/proton_trail.svg-d12603cf005191ac7bc2fb365184e358.stex" ]
 
 [params]
 
