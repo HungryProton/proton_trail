@@ -73,7 +73,7 @@ func _enter_tree() -> void:
 
 func _exit_tree() -> void:
 	if _geometry and _geometry.get_parent():
-		_geometry.get_parent().remove_child(_geometry)
+		_geometry.get_parent().call_deferred("remove_child", _geometry)
 
 
 func _process(delta : float):
