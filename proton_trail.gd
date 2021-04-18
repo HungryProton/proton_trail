@@ -133,10 +133,12 @@ func _update_geometry():
 	else:
 		_add_points_to_trail(ceil(dist / _max_dist))
 
-	_smooth_trail()
+	_smooth_trail(_data)
+	for data in _previous_data:
+		_smooth_trail(data)
 
 
-func _smooth_trail() -> void:
+func _smooth_trail(data: Array) -> void:
 	if smooth == 0.0:
 		return
 
@@ -149,21 +151,21 @@ func _smooth_trail() -> void:
 	var mean1: Vector3
 	var mean2: Vector3
 
-	for i in _data.size() - 1:
+	for i in data.size() - 1:
 		if i == 0:
 			continue
 
-		a1 = _data[i - 1].p1
-		a2 = _data[i - 1].p2
-		b1 = _data[i].p1
-		b2 = _data[i].p2
-		c1 = _data[i + 1].p1
-		c2 = _data[i + 1].p2
+		a1 = data[i - 1].p1
+		a2 = data[i - 1].p2
+		b1 = data[i].p1
+		b2 = data[i].p2
+		c1 = data[i + 1].p1
+		c2 = data[i + 1].p2
 
 		mean1 = (a1 + c1) / 2.0
 		mean2 = (a2 + c2) / 2.0
-		_data[i].p1 = b1.linear_interpolate(mean1, smooth)
-		_data[i].p2 = b2.linear_interpolate(mean2, smooth)
+		data[i].p1 = b1.linear_interpolate(mean1, smooth)
+		data[i].p2 = b2.linear_interpolate(mean2, smooth)
 
 
 func _add_points_to_trail(count: int):
