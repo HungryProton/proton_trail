@@ -37,7 +37,9 @@ export var life_time = 0.1
 export(float, 0.0, 1.0) var smooth = 0.5
 export var invert_uv_x := false
 export var invert_uv_y := false
+export var cast_shadow := true
 export var emit := true setget set_emit
+
 
 var _geometry := ImmediateGeometry.new()
 var _data := []
@@ -52,6 +54,7 @@ class Point:
 	var ttl: float
 	var p1: Vector3
 	var p2: Vector3
+	var n: Vector3
 
 
 func _ready():
@@ -62,6 +65,7 @@ func _ready():
 	_geometry.set_name(get_name() + "Geometry")
 	_geometry.set_material_override(material)
 	_geometry.translation = Vector3(0.0, 0.0, 0.0)
+	_geometry.cast_shadow = cast_shadow
 
 	_max_dist = 1.0 / resolution
 
@@ -139,9 +143,6 @@ func _update_geometry():
 
 
 func _smooth_trail(data: Array) -> void:
-	if smooth == 0.0:
-		return
-
 	var a1: Vector3
 	var a2: Vector3
 	var b1: Vector3
@@ -166,6 +167,7 @@ func _smooth_trail(data: Array) -> void:
 		mean2 = (a2 + c2) / 2.0
 		data[i].p1 = b1.linear_interpolate(mean1, smooth)
 		data[i].p2 = b2.linear_interpolate(mean2, smooth)
+		data[i].n = (b1 - mean1).normalized()
 
 
 func _add_points_to_trail(count: int):
@@ -209,11 +211,16 @@ func _draw_geometry(data: Array):
 
 	_geometry.begin(Mesh.PRIMITIVE_TRIANGLE_STRIP, null)
 
+	var a: Vector3
+	var b: Vector3
+	var c: Vector3
+
 	for i in count:
 		uv_x = i / (count - 1.0)
 		if invert_uv_x:
 			uv_x = 1.0 - uv_x
 
+		_geometry.set_normal(data[i].n)
 		_geometry.set_uv(Vector2(uv_x, uv_y_top))
 		_geometry.add_vertex(data[i].p1)
 
