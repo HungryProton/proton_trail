@@ -1,4 +1,4 @@
-tool
+@tool
 extends EditorPlugin
 
 
@@ -9,7 +9,7 @@ func get_name():
 func _enter_tree():
 	add_custom_type(
 		"ProtonTrail",
-		"Spatial",
+		"Node3D",
 		preload("proton_trail.gd"),
 		preload("proton_trail.svg")
 	)

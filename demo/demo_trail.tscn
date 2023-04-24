@@ -1,77 +1,80 @@
-[gd_scene load_steps=6 format=2]
+[gd_scene load_steps=8 format=3 uid="uid://d2hccpum84ixw"]
 
-[ext_resource path="res://addons/proton_trail/proton_trail.gd" type="Script" id=1]
-[ext_resource path="res://addons/proton_trail/proton_trail.svg" type="Texture" id=2]
-[ext_resource path="res://addons/proton_trail/demo/sword_trail.tres" type="Material" id=3]
+[ext_resource type="Script" path="res://addons/proton_trail/proton_trail.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://bwldxwdpi50co" path="res://addons/proton_trail/proton_trail.svg" id="2"]
+[ext_resource type="Material" path="res://addons/proton_trail/demo/sword_trail.tres" id="3"]
 
-[sub_resource type="Animation" id=1]
+[sub_resource type="Animation" id="1"]
 resource_name = "Swing"
 length = 2.0
-loop = true
-tracks/0/type = "bezier"
-tracks/0/path = NodePath(".:rotation_degrees:x")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
+loop_mode = 1
+tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
+tracks/0/path = NodePath(".:rotation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
 tracks/0/keys = {
-"points": PoolRealArray( 0, -0.25, 0, 0.25, 0, 0, -0.25, 0, 0.25, 0, -9.83098e-14, -0.25, 0, 0.25, 0 ),
-"times": PoolRealArray( 0, 1, 2 )
-}
-tracks/1/type = "bezier"
-tracks/1/path = NodePath(".:rotation_degrees:y")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/keys = {
-"points": PoolRealArray( 0, -0.25, 0, 0.25, 0, 0, -0.25, 0, 0.25, 0, -180, -0.25, 0, 0.25, 0 ),
-"times": PoolRealArray( 0, 1, 2 )
-}
-tracks/2/type = "bezier"
-tracks/2/path = NodePath(".:rotation_degrees:z")
-tracks/2/interp = 1
-tracks/2/loop_wrap = true
-tracks/2/imported = false
-tracks/2/enabled = true
-tracks/2/keys = {
-"points": PoolRealArray( -105, -0.25, 0, 0.25, 0, 105, -0.25, 0, 0.25, 0, 105, -0.25, 0, 0.25, 0 ),
-"times": PoolRealArray( 0, 1, 2 )
+"times": PackedFloat32Array(0, 1, 2),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector3(0, 0, -2.04095), Vector3(0, 0, 1.81731), Vector3(0, -2.89637, 1.81731)]
 }
 
-[sub_resource type="CubeMesh" id=2]
-size = Vector3( 0.1, 1, 0.1 )
+[sub_resource type="Animation" id="Animation_aiib5"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:rotation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector3(-5.8965e-07, -2.64677, 1.8326)]
+}
 
-[node name="DemoTrail" type="Spatial"]
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_fg6pu"]
+_data = {
+"RESET": SubResource("Animation_aiib5"),
+"Swing": SubResource("1")
+}
 
-[node name="Camera" type="Camera" parent="."]
-transform = Transform( -1, 1.77636e-15, -8.74228e-08, -2.26267e-08, 0.965926, 0.258819, 8.44439e-08, 0.258819, -0.965926, 0.000137925, 0.995728, -4.34288 )
+[sub_resource type="BoxMesh" id="2"]
+size = Vector3(0.1, 1, 0.1)
 
-[node name="RotationRoot" type="Spatial" parent="."]
-transform = Transform( 0.227775, 0.850066, -0.474874, 0.965926, -0.258819, 1.44558e-15, -0.122906, -0.458693, -0.880054, 0, 0, 0 )
+[node name="DemoTrail" type="Node3D"]
+
+[node name="Camera" type="Camera3D" parent="."]
+transform = Transform3D(-1, 1.77636e-15, -8.74228e-08, -2.26267e-08, 0.965926, 0.258819, 8.44439e-08, 0.258819, -0.965926, 0.000137925, 0.995728, -4.34288)
+
+[node name="RotationRoot" type="Node3D" parent="."]
+transform = Transform3D(0.227775, 0.850067, -0.474874, 0.965926, -0.258819, 5.8965e-07, -0.122906, -0.458693, -0.880054, 0, 0, 0)
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="RotationRoot"]
 autoplay = "Swing"
-playback_speed = 1.5
-anims/Swing = SubResource( 1 )
-
-[node name="MeshInstance" type="MeshInstance" parent="RotationRoot"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0384894, 1.5, -0.101642 )
-mesh = SubResource( 2 )
-material/0 = null
-
-[node name="Trail" type="Spatial" parent="RotationRoot/MeshInstance"]
-transform = Transform( 1, -6.74248e-10, 0, -6.74248e-10, 1, 0, 0, 0, 1, 7.84465e-11, -1.61635, -3.63798e-12 )
-script = ExtResource( 1 )
-__meta__ = {
-"_editor_icon": ExtResource( 2 )
+libraries = {
+"": SubResource("AnimationLibrary_fg6pu")
 }
-material = ExtResource( 3 )
+
+[node name="MeshInstance" type="MeshInstance3D" parent="RotationRoot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0384894, 1.5, -0.101642)
+mesh = SubResource("2")
+
+[node name="Trail" type="Node3D" parent="RotationRoot/MeshInstance"]
+transform = Transform3D(1, -6.74248e-10, 0, -6.74248e-10, 1, 0, 0, 0, 1, 7.84465e-11, -1.61635, -3.63798e-12)
+script = ExtResource("1")
+__meta__ = {
+"_editor_icon": ExtResource("2")
+}
+material = ExtResource("3")
 resolution = 6.0
 life_time = 1.0
 
-[node name="Top" type="Position3D" parent="RotationRoot/MeshInstance/Trail"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.1, 0 )
+[node name="Top" type="Marker3D" parent="RotationRoot/MeshInstance/Trail"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.1, 0)
 
-[node name="Bottom" type="Position3D" parent="RotationRoot/MeshInstance/Trail"]
-transform = Transform( 1, -2.33147e-15, 0, -2.33147e-15, 1, -1.42109e-14, -3.55271e-15, 1.42109e-14, 1, 0.00757822, 1.12002, 0 )
+[node name="Bottom" type="Marker3D" parent="RotationRoot/MeshInstance/Trail"]
+transform = Transform3D(1, -2.33147e-15, 0, -2.33147e-15, 1, -1.42109e-14, -3.55271e-15, 1.42109e-14, 1, 0.00757822, 1.12002, 0)
