@@ -1,5 +1,5 @@
-tool
-extends Spatial
+@tool
+extends Node3D
 
 # --
 # ProtonTrail
@@ -31,23 +31,24 @@ extends Spatial
 #   new geometry.
 # --
 
-export var material: Material
-export var resolution := 4.0
-export var life_time = 0.1
-export(float, 0.0, 1.0) var smooth = 0.5
-export var invert_uv_x := false
-export var invert_uv_y := false
-export var cast_shadow := true
-export var emit := true setget set_emit
+@export var material: Material
+@export var resolution := 4.0
+@export var life_time := 0.1
+@export_range(0.0, 1.0) var smooth := 0.5
+@export var invert_uv_x := false
+@export var invert_uv_y := false
+@export var cast_shadow := true
+@export var emit := true : set = set_emit
 
 
-var _geometry := ImmediateGeometry.new()
+var _meshInstance := MeshInstance3D.new()
+var _geometry := ImmediateMesh.new()
 var _data := []
 var _previous_data := []
 var _max_dist: float
 
-onready var _top: Spatial = get_node("Top")
-onready var _bottom: Spatial = get_node("Bottom")
+@onready var _top: Node3D = get_node("Top")
+@onready var _bottom: Node3D = get_node("Bottom")
 
 
 class Point:
@@ -62,22 +63,22 @@ func _ready():
 		if not _top or not _bottom:
 			_create_required_nodes()
 
-	_geometry.set_name(get_name() + "Geometry")
-	_geometry.set_material_override(material)
-	_geometry.translation = Vector3(0.0, 0.0, 0.0)
-	_geometry.cast_shadow = cast_shadow
+	_meshInstance.set_name(get_name() + "Geometry")
+	_meshInstance.set_material_override(material)
+	_meshInstance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if cast_shadow else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_meshInstance.mesh = _geometry
 
 	_max_dist = 1.0 / resolution
 
 
 func _enter_tree() -> void:
-	if _geometry and not _geometry.get_parent():
-		get_tree().get_root().call_deferred("add_child", _geometry)
+	if _meshInstance and not _meshInstance.get_parent():
+		get_tree().get_root().call_deferred("add_child", _meshInstance)
 
 
 func _exit_tree() -> void:
-	if _geometry and _geometry.get_parent():
-		_geometry.get_parent().call_deferred("remove_child", _geometry)
+	if _meshInstance and _meshInstance.get_parent():
+		_meshInstance.get_parent().call_deferred("remove_child", _meshInstance)
 
 
 func _process(delta : float):
@@ -165,8 +166,8 @@ func _smooth_trail(data: Array) -> void:
 
 		mean1 = (a1 + c1) / 2.0
 		mean2 = (a2 + c2) / 2.0
-		data[i].p1 = b1.linear_interpolate(mean1, smooth)
-		data[i].p2 = b2.linear_interpolate(mean2, smooth)
+		data[i].p1 = b1.lerp(mean1, smooth)
+		data[i].p2 = b2.lerp(mean2, smooth)
 		data[i].n = (b1 - mean1).normalized()
 
 
@@ -180,8 +181,8 @@ func _add_points_to_trail(count: int):
 		var f: float = (i + 1.0) / (count)
 		var p = Point.new()
 		p.ttl = life_time
-		p.p1 = top_start.linear_interpolate(top_end, f)
-		p.p2 = bottom_start.linear_interpolate(bottom_end, f)
+		p.p1 = top_start.lerp(top_end, f)
+		p.p2 = bottom_start.lerp(bottom_end, f)
 		_data.push_front(p)
 
 
@@ -194,7 +195,7 @@ func _add_single_point():
 
 
 func _draw_all_geometry() -> void:
-	_geometry.clear()
+	_geometry.clear_surfaces()
 	_draw_geometry(_data)
 	for d in _previous_data:
 		_draw_geometry(d)
@@ -209,7 +210,7 @@ func _draw_geometry(data: Array):
 	var uv_y_top := 1.0 if invert_uv_y else 0.0
 	var uv_y_bottom := 0.0 if invert_uv_y else 1.0
 
-	_geometry.begin(Mesh.PRIMITIVE_TRIANGLE_STRIP, null)
+	_geometry.surface_begin(Mesh.PRIMITIVE_TRIANGLE_STRIP, null)
 
 	var a: Vector3
 	var b: Vector3
@@ -220,25 +221,25 @@ func _draw_geometry(data: Array):
 		if invert_uv_x:
 			uv_x = 1.0 - uv_x
 
-		_geometry.set_normal(data[i].n)
-		_geometry.set_uv(Vector2(uv_x, uv_y_top))
-		_geometry.add_vertex(data[i].p1)
+		_geometry.surface_set_normal(data[i].n)
+		_geometry.surface_set_uv(Vector2(uv_x, uv_y_top))
+		_geometry.surface_add_vertex(data[i].p1)
 
-		_geometry.set_uv(Vector2(uv_x , uv_y_bottom))
-		_geometry.add_vertex(data[i].p2)
+		_geometry.surface_set_uv(Vector2(uv_x , uv_y_bottom))
+		_geometry.surface_add_vertex(data[i].p2)
 
-	_geometry.end()
+	_geometry.surface_end()
 
 
 func _create_required_nodes():
 	var owner = get_tree().get_edited_scene_root()
-	_top = Position3D.new()
+	_top = Marker3D.new()
 	_top.set_name("Top")
 	add_child(_top)
 	_top.translate(Vector3.UP)
 	_top.set_owner(owner)
 
-	_bottom = Position3D.new()
+	_bottom = Marker3D.new()
 	_bottom.set_name("Bottom")
 	add_child(_bottom)
 	_bottom.translate(Vector3.DOWN)
