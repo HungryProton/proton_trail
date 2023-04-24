@@ -47,8 +47,8 @@ var _data := []
 var _previous_data := []
 var _max_dist: float
 
-@onready var _top: Node3D = get_node("Top")
-@onready var _bottom: Node3D = get_node("Bottom")
+@onready var _top: Node3D = get_node_or_null("Top")
+@onready var _bottom: Node3D = get_node_or_null("Bottom")
 
 
 class Point:
@@ -102,7 +102,7 @@ func _update_all_ttl(delta: float) -> void:
 	for i in size:
 		index = size - 1.0 - i
 		_update_ttl(_previous_data[index], delta)
-		if _previous_data[index].empty():
+		if _previous_data[index].is_empty():
 			_previous_data.pop_back()
 
 
