@@ -77,8 +77,8 @@ func _enter_tree() -> void:
 
 
 func _exit_tree() -> void:
-	if _meshInstance and _meshInstance.get_parent():
-		_meshInstance.get_parent().call_deferred("remove_child", _meshInstance)
+	if is_instance_valid(_meshInstance):
+		_meshInstance.queue_free()
 
 
 func _process(delta : float):
